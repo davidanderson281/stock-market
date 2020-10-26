@@ -1,6 +1,6 @@
 package main.stockmarket.domain;
 
-public enum ShareType {
+public enum TradeType {
     BUY,
     SELL
 }

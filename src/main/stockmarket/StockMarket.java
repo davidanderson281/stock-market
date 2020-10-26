@@ -1,8 +1,6 @@
 package main.stockmarket;
 
-import main.stockmarket.domain.Stock;
-import main.stockmarket.domain.StockSymbol;
-import main.stockmarket.domain.StockType;
+import main.stockmarket.domain.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -13,12 +11,15 @@ import java.util.Scanner;
 
 public class StockMarket {
 
+    public static final String EMPTY_STRING = "";
+    public static final String ISSUE_WITH_NUMBER_TRY_AGAIN = "Issue with number, try again";
     List<Stock> stocks = new ArrayList<>();
+    List<Trade> trades = new ArrayList<>();
 
     public StockMarket() {
-            createStocks();
-            getUserInput();
-            System.out.println("Geometric Mean for all stocks: " + getGeometricMean());
+        createStocks();
+        getUserInput();
+        System.out.println("GBCE All Share Index for all stocks: " + getGeometricMean());
     }
 
     private void createStocks() {
@@ -33,27 +34,94 @@ public class StockMarket {
     private void getUserInput() {
         Scanner scanner = new Scanner(System.in);
         for (Stock stock : stocks) {
-            boolean success = false;
-            while (!success) {
+            while (stock.getPrice() == null || stock.getPrice() == 0.0) {
                 System.out.println("Enter the price (in pounds) for " + stock.getStockSymbol() + ":");
                 String input = scanner.nextLine();
-                success = isInputValid(input, stock);
+                stock.setPrice(isDoubleInputValid(input));
             }
             showOutputForStock(stock);
+
+            System.out.println("Do you wish to record a trade for " + stock.getStockSymbol() + "? (y/n)");
+            String tradeInput = scanner.nextLine();
+            if (tradeInput.toLowerCase().equals("y")) {
+                createNewTrade(scanner);
+                System.out.println("Volume Weighted Stock Price is: " + getVolumeWeightedStockPrice());
+                System.out.println(EMPTY_STRING);
+            }
         }
     }
 
-    public boolean isInputValid(String input, Stock stock) {
+    public void createNewTrade(Scanner scanner) {
+        Integer shareQuantity = null;
+        while (shareQuantity == null) {
+            System.out.println("Enter the share quantity:");
+            String shareQuantityInput = scanner.nextLine();
+            shareQuantity = isIntegerInputValid(shareQuantityInput);
+        }
+
+        TradeType tradeTypeIndicator = null;
+        while (tradeTypeIndicator == null) {
+            System.out.println("'Buy' or 'Sell' trade:");
+            String buySellInput = scanner.nextLine();
+            tradeTypeIndicator = isTradeTypeInputValid(buySellInput);
+        }
+
+        Double tradedPrice = null;
+        while (tradedPrice == null) {
+            System.out.println("Enter the traded price:");
+            String tradedPriceInput = scanner.nextLine();
+            tradedPrice = isDoubleInputValid(tradedPriceInput);
+        }
+
+        trades.add(new Trade(shareQuantity, tradeTypeIndicator, tradedPrice));
+    }
+
+    public Double getVolumeWeightedStockPrice() {
+        int sumOfPriceTimesQuantity = 0;
+        int sumOfQuantities = 0;
+        for (Trade trade : trades) {
+            sumOfPriceTimesQuantity += (trade.getTradedPrice() * trade.getShareQuantity());
+            sumOfQuantities += trade.getShareQuantity();
+        }
+
+        return (double) (sumOfPriceTimesQuantity / sumOfQuantities);
+
+    }
+
+    public Double isDoubleInputValid(String input) {
         try {
             Double parsedInput = Double.parseDouble(input);
             if (parsedInput == 0.0) {
                 throw new NumberFormatException();
             }
-            stock.setPrice(parsedInput);
-            return true;
+            return parsedInput;
         } catch (NumberFormatException e) {
-            System.out.println("Issue with number, try again");
-            return false;
+            System.out.println(ISSUE_WITH_NUMBER_TRY_AGAIN);
+            return null;
+        }
+    }
+
+    public Integer isIntegerInputValid(String input) {
+        try {
+            Integer parsedInput = Integer.parseInt(input);
+            if (parsedInput == 0) {
+                throw new NumberFormatException();
+            }
+            return parsedInput;
+        } catch (NumberFormatException e) {
+            System.out.println(ISSUE_WITH_NUMBER_TRY_AGAIN);
+            return null;
+        }
+    }
+
+    public TradeType isTradeTypeInputValid(String input) {
+        if (input.toLowerCase().equals("buy")) {
+            return TradeType.BUY;
+        } else if (input.toLowerCase().equals("sell")) {
+            return TradeType.SELL;
+        } else {
+            System.out.println("Issue with Buy/Sell input, try again");
+            return null;
         }
     }
 
@@ -61,7 +129,7 @@ public class StockMarket {
         setFormulaValuesForStock(stock);
         System.out.println("Dividend Yield for " + stock.getStockSymbol() + ": " + stock.getDividendYield());
         System.out.println("P/E Ratio for " + stock.getStockSymbol() + ": " + stock.getPeRatio());
-        System.out.println("");
+        System.out.println(EMPTY_STRING);
     }
 
     private void setFormulaValuesForStock(Stock stock) {
@@ -70,13 +138,13 @@ public class StockMarket {
         Double lastDividend = stock.getLastDividend();
         Double fixedDividend = stock.getFixedDividend();
         Double parValue = stock.getParValue();
-        Double dividendYield = 0.0;
-        Double peRatio = 0.0;
+        double dividendYield = 0.0;
+        double peRatio = 0.0;
 
-        if (stockType == StockType.COMMON && lastDividend != 0.0) {
+        if (stockType == StockType.COMMON && lastDividend != null && lastDividend != 0.0) {
             dividendYield = lastDividend / price;
             peRatio = price / dividendYield;
-        } else if (stockType == StockType.PREFERRED && fixedDividend != 0.0) {
+        } else if (stockType == StockType.PREFERRED && fixedDividend != null && fixedDividend != 0.0) {
             dividendYield = (fixedDividend * parValue) / price;
             peRatio = price / dividendYield;
         }
@@ -91,10 +159,6 @@ public class StockMarket {
     public void setStocks(Stock... stocks) {
         this.stocks.clear();
         this.stocks.addAll(Arrays.asList(stocks));
-    }
-
-    public void clearStocks() {
-        this.stocks.clear();
     }
 
     private Double round2(Double val) {
