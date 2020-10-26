@@ -1,4 +1,4 @@
-package domain;
+package main.stockmarket.domain;
 
 public class Stock {
 
@@ -8,7 +8,8 @@ public class Stock {
     private Double fixedDividend;
     private Double parValue;
     private Double price;
-    private Double dividendYield = 0.0;
+    private Double dividendYield;
+    private Double peRatio;
 
     public Stock(StockSymbol stockSymbol, StockType stockType, Double lastDividend, Double fixedDividend, Double parValue) {
         this.stockSymbol = stockSymbol;
@@ -72,5 +73,13 @@ public class Stock {
 
     public void setDividendYield(Double dividendYield) {
         this.dividendYield = dividendYield;
+    }
+
+    public Double getPeRatio() {
+        return peRatio;
+    }
+
+    public void setPeRatio(Double peRatio) {
+        this.peRatio = peRatio;
     }
 }

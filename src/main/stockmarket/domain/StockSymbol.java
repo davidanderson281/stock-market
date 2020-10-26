@@ -1,4 +1,4 @@
-package domain;
+package main.stockmarket.domain;
 
 public enum StockSymbol {
     TEA,
