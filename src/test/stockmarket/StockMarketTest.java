@@ -71,6 +71,13 @@ public class StockMarketTest {
     }
 
     @Test
+    public void testDates() {
+        StockMarket testee = new StockMarket();
+
+        assertNull(testee.getVolumeWeightedStockPrice());
+    }
+
+    @Test
     public void testIsIntegerInputValid() {
         StockMarket testee = new StockMarket();
         assertNull(testee.isIntegerInputValid("0"));

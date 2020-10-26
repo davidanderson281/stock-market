@@ -4,6 +4,7 @@ import main.stockmarket.domain.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -80,8 +81,11 @@ public class StockMarket {
         int sumOfPriceTimesQuantity = 0;
         int sumOfQuantities = 0;
         for (Trade trade : trades) {
-            sumOfPriceTimesQuantity += (trade.getTradedPrice() * trade.getShareQuantity());
-            sumOfQuantities += trade.getShareQuantity();
+            LocalDateTime fifteenMinesAgo = LocalDateTime.now().minusMinutes(15);
+            if (trade.getTimestamp().isAfter(fifteenMinesAgo)) {
+                sumOfPriceTimesQuantity += (trade.getTradedPrice() * trade.getShareQuantity());
+                sumOfQuantities += trade.getShareQuantity();
+            }
         }
 
         return (double) (sumOfPriceTimesQuantity / sumOfQuantities);

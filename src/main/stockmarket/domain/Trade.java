@@ -1,26 +1,27 @@
 package main.stockmarket.domain;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class Trade {
 
-    private Date timestamp;
+    private LocalDateTime timestamp;
     private int shareQuantity;
     private TradeType tradeTypeIndicator;
     private Double tradedPrice;
 
     public Trade(int shareQuantity, TradeType tradeTypeIndicator, Double tradedPrice) {
-        this.timestamp = new Date();
+        this.timestamp = LocalDateTime.now();
         this.shareQuantity = shareQuantity;
         this.tradeTypeIndicator = tradeTypeIndicator;
         this.tradedPrice = tradedPrice;
     }
 
-    public Date getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
 
